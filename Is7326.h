@@ -1,54 +1,58 @@
-#ifndef __IS31IO7326_H__
-#define __IS31IO7326_H__
+#pragma once
 
 #include <Arduino.h>
 
+
 typedef struct {
-  byte ad01;
-  boolean down;
-  byte key;
+  uint8_t down:1,
+          key:6;
 } key_t;
 
-// these are the two main methods -- one to check if a key has been
-// pressed or released, and one to read it.
-bool isKeyReady();
-key_t readKey();
 
 // config options
-#define AUTO_CLEAR_INT_DISABLED 0
-#define AUTO_CLEAR_INT_5MS 0x20
-#define AUTO_CLEAR_INT_10MS 0x40
+#define AUTO_CLEAR_INT_DISABLED 0x00
+#define AUTO_CLEAR_INT_5MS      0x20
+#define AUTO_CLEAR_INT_10MS     0x40
 
-#define INPUT_PORT_FILTER_ENABLE 0x10
-#define INPUT_PORT_FILTER_DISABLE 0
+#define INPUT_PORT_FILTER_ENABLE  0x10
+#define INPUT_PORT_FILTER_DISABLE 0x00
 
-#define KEY_SCAN_DEBOUNCE_TIME_DOUBLE_6_8MS 0
-#define KEY_SCAN_DEBOUNCE_TIME_NORMAL_3_4MS 0x8
+#define KEY_SCAN_DEBOUNCE_TIME_DOUBLE_6_8MS 0x00
+#define KEY_SCAN_DEBOUNCE_TIME_NORMAL_3_4MS 0x08
 
-#define LONGPRESS_DETECT_ENABLE 0x4
-#define LONGPRESS_DETECT_DISABLE 0
+#define LONGPRESS_DETECT_ENABLE  0x04
+#define LONGPRESS_DETECT_DISABLE 0x00
 
-#define LONGPRESS_DELAY_20MS 0
-#define LONGPRESS_DELAY_40MS 1
-#define LONGPRESS_DELAY_1S 2
-#define LONGPRESS_DELAY_2S 3
+#define LONGPRESS_DELAY_20MS 0x00
+#define LONGPRESS_DELAY_40MS 0x01
+#define LONGPRESS_DELAY_1S   0x02
+#define LONGPRESS_DELAY_2S   0x03
 
-// used to configure interrupts, configuration for a particular controller
+
 class Is7326 {
 public:
-  Is7326(byte setAd01);
+  // Initialize object with address ad01
+  Is7326(byte ad01);
   ~Is7326();
-  void start(byte interrupt);
+
+  // attaches the proper interrupt controller to the given PIN
+  // TODO: doc that not attaching interrupt means key 0 is not supported
+  void attachInterrupt(byte interruptPin);
+
+  // returns < 0 on error
   byte setConfig(byte config);
-  byte setConfigOnce(byte config);
+
+  // returns < 0 on error, otherwise returns the configuration register
   int readConfig();
-  void keyDown();
+
+  // returns true if a key is ready to be read
+  bool isKeyReady();
+
+  // gives information on the key that was just pressed or released.
+  // you should call iskeyReady() first
+  bool readKey(key_t *keyInfo);
 
 private:
-  bool configured = false;
-  byte addr;
-  byte ad01;
+  byte ad01:2,
+       intrActive:1;
 };
-
-
-#endif
