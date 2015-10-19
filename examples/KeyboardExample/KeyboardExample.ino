@@ -6,27 +6,31 @@ Is7326 controller(0);
 void setup() {
   Serial.begin(9600);
   Wire.begin();
-  controller.setConfig(INPUT_PORT_FILTER_ENABLE |
-                      KEY_SCAN_DEBOUNCE_TIME_NORMAL_3_4MS);
+  controller.setConfig(IS7326_CONFIG_SD_NORMAL_3_4MS);
   controller.attachInterrupt(2);
 }
 
 void loop() {
-  key_t k;
-  if (controller.isKeyReady() && controller.readKey(&k)) {
-    Serial.print("\nConfiguration: ");
-    Serial.print(controller.readConfig(), BIN);
-    Serial.print("\n");
+  if (controller.isKeyReady()) {
+    int8_t k = controller.readKey();
+    if (k >= 0) {
+      int8_t configr = controller.readConfig();
+      if (configr >= 0) {
+        Serial.print("\nConfiguration: ");
+        Serial.print(configr, BIN);
+        Serial.print("\n");
+      }
 
-    Serial.print("Controller ");
-    if (k.down) {
-      Serial.print(" pressed key ");
-    } else {
-      Serial.print("released key ");
+      Serial.print("Controller ");
+      if (k & IS7326_KEY_DOWN_MASK) {
+        Serial.print(" pressed key ");
+      } else {
+        Serial.print("released key ");
+      }
+      Serial.print(k & IS7326_KEY_CODE_MASK, DEC);
+      Serial.print("\n");
     }
-    Serial.print(k.key, DEC);
-    Serial.print("\n");
   }
 
-  delay(1);
+  delay(100);
 }
