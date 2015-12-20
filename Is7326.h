@@ -96,13 +96,19 @@ public:
    *
    * Returns 0 on success, < 0 on error.
    *
-   * NOTE: This function returns key 0 event information when there is no new
-   * data to report, which means drivers that have not attached an interrupt
-   * cannot trust key event data for key 0.
+   * NOTES: This function may return key 0 event information when there is no
+   * new data to report, which means applications that have not attached an
+   * interrupt cannot trust key event data for key 0.
+   *
+   * If the scanner is using the is31io7326_clone firmware, this function will
+   * correctly return an error code when there is no new key event information
+   * available, even in the absence of an attached interrupt. Despite this
+   * behaviour, isKeyReady will still return false.
    ***************************************************************************/
   int8_t readKey(is7326_key_t *key);
 
 private:
   uint8_t ad01:2,
-          intrActive:1;
+          intrActive:1,
+          key0State:1;
 };

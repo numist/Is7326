@@ -24,6 +24,7 @@ static inline void clearReady(uint8_t ad01) { intrMask &= ~(1 << ad01); }
 Is7326::Is7326(uint8_t setAd01) {
   ad01 = setAd01 & 0x3;
   intrActive = 0;
+  key0State = 0;
 }
 
 Is7326::~Is7326() {}
@@ -82,6 +83,14 @@ int8_t Is7326::readKey(is7326_key_t *key) {
     noInterrupts();
     clearReady(ad01);
     interrupts();
+  }
+
+  if (intrActive == 0 && key.code == 0) {
+    if (key.down == key0State) {
+      return UINT8_MIN;
+    } else {
+      key0State = key.down;
+    }
   }
 
   return 0;
