@@ -40,7 +40,7 @@ int8_t Is7326::setConfig(uint8_t config) {
   return -Wire.endTransmission();
 }
 
-int8_t Is7326::readConfig() {
+int8_t Is7326::readConfig(uint8_t *config) {
   Wire.beginTransmission(IS31IO7326_I2C_ADDR_BASE | ad01);
   Wire.write(0x8);
   int8_t error = Wire.endTransmission();
@@ -53,14 +53,15 @@ int8_t Is7326::readConfig() {
     while(Wire.available()) { Wire.read(); }
     return -(5 + bytes);
   }
-  return Wire.read() & 0x7F;
+  *config = Wire.read() & 0x7F;
+  return 0;
 }
 
 bool Is7326::isKeyReady() {
   return keyReady(ad01);
 }
 
-int8_t Is7326::readKey() {
+int8_t Is7326::readKey(is7326_key_t *key) {
   uint8_t addr = IS31IO7326_I2C_ADDR_BASE | ad01;
   Wire.beginTransmission(addr);
   Wire.write(0x10);
@@ -75,13 +76,13 @@ int8_t Is7326::readKey() {
     return -(5 + bytes);
   }
 
-  uint8_t k = Wire.read();
-  if (intrActive && (k & 0x80) == 0) {
+  *(uint8_t *)key = Wire.read();
+  if (intrActive && !key.reserved) {
     // no extra keys, clear the interrupt flag for this address
     noInterrupts();
     clearReady(ad01);
     interrupts();
   }
 
-  return k & ~0x80;
+  return 0;
 }

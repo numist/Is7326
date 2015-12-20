@@ -12,22 +12,22 @@ void setup() {
 
 void loop() {
   if (controller.isKeyReady()) {
-    int8_t k = controller.readKey();
-    if (k >= 0) {
-      int8_t configr = controller.readConfig();
-      if (configr >= 0) {
+    is7326_key_t key;
+    if (!controller.readKey(&key)) {
+      int8_t configr;
+      if (!controller.readConfig(&configr)) {
         Serial.print("\nConfiguration: ");
         Serial.print(configr, BIN);
         Serial.print("\n");
       }
 
       Serial.print("Controller ");
-      if (k & IS7326_KEY_DOWN_MASK) {
+      if (key.down) {
         Serial.print(" pressed key ");
       } else {
         Serial.print("released key ");
       }
-      Serial.print(k & IS7326_KEY_CODE_MASK, DEC);
+      Serial.print(key.code, DEC);
       Serial.print("\n");
     }
   }

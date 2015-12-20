@@ -2,8 +2,11 @@
 
 #include <Arduino.h>
 
-#define IS7326_KEY_DOWN_MASK 0x40
-#define IS7326_KEY_CODE_MASK 0x3F
+typedef struct {
+    uint8_t code:6,
+            down:1,
+            reserved:1;
+} is7326_key_t;
 
 /*
  * Configuration options
@@ -76,7 +79,7 @@ public:
    *
    * Returns < 0 on error.
    ***************************************************************************/
-  int8_t readConfig();
+  int8_t readConfig(uint8_t *config);
 
   /*
    * Returns true if a key is ready to be read.
@@ -96,7 +99,7 @@ public:
    * which means drivers that have not attached an interrupt cannot trust
    * key event data for key 0.
    ***************************************************************************/
-  int8_t readKey();
+  int8_t readKey(is7326_key_t *key);
 
 private:
   uint8_t ad01:2,
