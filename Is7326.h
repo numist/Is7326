@@ -75,9 +75,10 @@ public:
   int8_t setConfig(uint8_t config);
 
   /*
-   * Reads the configuration register from the IS31IO7326.
+   * Reads the configuration register from the IS31IO7326 into the parameter's
+   * memory.
    *
-   * Returns < 0 on error.
+   * Returns 0 on success, < 0 on error.
    ***************************************************************************/
   int8_t readConfig(uint8_t *config);
 
@@ -90,14 +91,14 @@ public:
   bool isKeyReady();
 
   /*
-   * Returns key event information on success, < 0 on error.
+   * Reads key event information from the IS31IO7326 into the parameter's
+   * memory.
    *
-   * Key event information can be decoded using IS7326_KEY_DOWN_MASK and
-   * IS7326_KEY_CODE_MASK.
+   * Returns 0 on success, < 0 on error.
    *
-   * NOTE: This function returns 0 when there is no new data to report,
-   * which means drivers that have not attached an interrupt cannot trust
-   * key event data for key 0.
+   * NOTE: This function returns key 0 event information when there is no new
+   * data to report, which means drivers that have not attached an interrupt
+   * cannot trust key event data for key 0.
    ***************************************************************************/
   int8_t readKey(is7326_key_t *key);
 
